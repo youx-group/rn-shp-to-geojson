@@ -1,6 +1,7 @@
 # React Native Shapefile to Geojson
 
-rn-shp-to-geojson is a Node.js library for parsing shapefiles into GeoJSON objects.
+rn-shp-to-geojson is a React Native library for parsing shapefiles into GeoJSON objects.
+It uses react-native-blob-util and react-native-fs to read and process the files.
 
 ## Installation
 
