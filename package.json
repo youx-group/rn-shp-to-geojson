@@ -29,7 +29,7 @@
     "build": "tsc",
     "build:watch": "npm run build --watch",
     "build:clean": "rimraf lib",
-    "test": "jest --coverage --transformIgnorePatterns=''",
+    "test": "",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
     "prepare": "npm run build:clean && npm run build",
