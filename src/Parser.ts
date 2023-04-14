@@ -100,7 +100,7 @@ export default class Parser {
             break
         }
       } catch (e) {
-        throw new Error('Error parsing shp file');
+        throw new Error('Error parsing shp file')
       }
       idx += length * 2
       features.push(feature)
