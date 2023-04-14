@@ -1,0 +1,21 @@
+{
+	"type": "FeatureCollection",
+	"features": [
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					-118.2490,
+					34.0522
+				]
+			},
+			"properties": {
+				"name": "Los Angeles International Airport",
+				"city": "Los Angeles",
+				"country": "United States",
+				"category": "A"
+			}
+		}
+	]
+}
