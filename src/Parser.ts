@@ -30,6 +30,8 @@ export default class Parser {
     // Se tivermos o shx, usar os offsets dele
     const index = this.parseShxIndex()
 
+    console.log(index)
+
     if (index) {
       // ler pela tabela de índices (shx)
       for (const { offset, length } of index) {
