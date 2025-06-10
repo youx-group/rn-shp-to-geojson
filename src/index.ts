@@ -41,15 +41,17 @@ export const parseFolder = async (
 }
 
 /**
- * Parses `shp` & `dbf` files into a GeoJSON objecta.
+ * Parses `shp` & `dbf` files into a GeoJSON object.
  * @param shpFile The path to the `shp` file.
  * @param dbfFile The path to the `dbf` file.
+ * @param shxFile The path to the `shx` file.
  * @param configuration The configuration settings to use.
  * @returns A promise containing the GeoJSON object.
  */
 export const parseFiles = async (
   shpFile: string | Buffer,
   dbfFile: string | Buffer,
+  shxFile?: string | Buffer,
   configuration?: Configuration,
 ): Promise<GeoJSON> => {
   if (typeof shpFile === 'string') {
@@ -60,6 +62,10 @@ export const parseFiles = async (
     const dbfReaded = await ReactNativeBlobUtil.fs.readFile(dbfFile, 'base64')
     dbfFile = Buffer.from(dbfReaded, 'base64')
   }
+  if (shxFile && typeof shxFile === 'string') {
+    const shxReaded = await ReactNativeBlobUtil.fs.readFile(shxFile, 'base64')
+    shxFile = Buffer.from(shxReaded, 'base64')
+  }
 
-  return new Parser(shpFile, dbfFile, configuration).parse()
+  return new Parser(shpFile, dbfFile, shxFile, configuration).parse()
 }
