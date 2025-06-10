@@ -19,6 +19,7 @@ export const parseFolder = async (
   const files = await readdir(folder)
   const shpFiles = files.filter(file => file.endsWith('.shp'))
   const dbfFiles = files.filter(file => file.endsWith('.dbf'))
+  const shxFiles = files.filter(file => file.endsWith('.shx'))
 
   if (shpFiles.length > 1) {
     throw new Error('Multiple shapefiles found.')
@@ -32,11 +33,16 @@ export const parseFolder = async (
   if (dbfFiles.length === 0) {
     throw new Error('No dbf files found.')
   }
+  if (shxFiles.length > 1) {
+    throw new Error('Multiple shx files found.')
+  }
 
   return parseFiles(
     joinPaths(folder, shpFiles[0]),
     joinPaths(folder, dbfFiles[0]),
-    undefined,
+    shxFiles && shxFiles.length !== 0
+      ? joinPaths(folder, shxFiles[0])
+      : undefined,
     configuration,
   )
 }
@@ -63,10 +69,13 @@ export const parseFiles = async (
     const dbfReaded = await ReactNativeBlobUtil.fs.readFile(dbfFile, 'base64')
     dbfFile = Buffer.from(dbfReaded, 'base64')
   }
-  if (shxFile && typeof shxFile === 'string') {
-    const shxReaded = await ReactNativeBlobUtil.fs.readFile(shxFile, 'base64')
-    shxFile = Buffer.from(shxReaded, 'base64')
-  }
+  let shxBuffer: Buffer | undefined =
+    typeof shxFile === 'string'
+      ? Buffer.from(
+          await ReactNativeBlobUtil.fs.readFile(shxFile, 'base64'),
+          'base64',
+        )
+      : shxFile
 
-  return new Parser(shpFile, dbfFile, shxFile, configuration).parse()
+  return new Parser(shpFile, dbfFile, shxBuffer, configuration).parse()
 }
