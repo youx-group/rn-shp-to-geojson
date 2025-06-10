@@ -52,6 +52,7 @@ export const parseFiles = async (
   dbfFile: string | Buffer,
   configuration?: Configuration,
 ): Promise<GeoJSON> => {
+  console.log('pegando do github')
   if (typeof shpFile === 'string') {
     const shpReaded = await ReactNativeBlobUtil.fs.readFile(shpFile, 'base64')
     shpFile = Buffer.from(shpReaded, 'base64')
