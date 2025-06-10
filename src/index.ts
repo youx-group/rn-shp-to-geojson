@@ -41,7 +41,7 @@ export const parseFolder = async (
 }
 
 /**
- * Parses `shp` & `dbf` files into a GeoJSON object.
+ * Parses `shp` & `dbf` files into a GeoJSON objecta.
  * @param shpFile The path to the `shp` file.
  * @param dbfFile The path to the `dbf` file.
  * @param configuration The configuration settings to use.
