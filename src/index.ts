@@ -36,6 +36,7 @@ export const parseFolder = async (
   return parseFiles(
     joinPaths(folder, shpFiles[0]),
     joinPaths(folder, dbfFiles[0]),
+    undefined,
     configuration,
   )
 }
@@ -62,13 +63,10 @@ export const parseFiles = async (
     const dbfReaded = await ReactNativeBlobUtil.fs.readFile(dbfFile, 'base64')
     dbfFile = Buffer.from(dbfReaded, 'base64')
   }
-  let shxBuffer: Buffer | undefined =
-    typeof shxFile === 'string'
-      ? Buffer.from(
-          await ReactNativeBlobUtil.fs.readFile(shxFile, 'base64'),
-          'base64',
-        )
-      : shxFile
+  if (shxFile && typeof shxFile === 'string') {
+    const shxReaded = await ReactNativeBlobUtil.fs.readFile(shxFile, 'base64')
+    shxFile = Buffer.from(shxReaded, 'base64')
+  }
 
-  return new Parser(shpFile, dbfFile, shxBuffer, configuration).parse()
+  return new Parser(shpFile, dbfFile, shxFile, configuration).parse()
 }
