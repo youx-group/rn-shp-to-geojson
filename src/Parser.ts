@@ -32,7 +32,7 @@ export default class Parser {
 
     console.log(index)
 
-    if (index) {
+    if (index && index.length !== 0) {
       // ler pela tabela de índices (shx)
       for (const { offset, length } of index) {
         try {
@@ -290,24 +290,14 @@ export default class Parser {
     if (!this.shx) return null
 
     const dataView = new DataView(new Uint8Array(this.shx).buffer)
+    const fileLength = dataView.getInt32(24, false) * 2 // Big-endian, em bytes
 
-    const fileLength = dataView.getInt32(24, false) * 2 // Big endian, em bytes
     const offsetsLengths: { offset: number; length: number }[] = []
-
-    let idx = 100 // pula header de 100 bytes
+    let idx = 100 // header tem 100 bytes
 
     while (idx + 8 <= fileLength) {
-      const offset = dataView.getInt32(idx, false) * 2 // Big endian -> *2 para bytes
-      const length = dataView.getInt32(idx + 4, false) * 2 // Big endian -> *2 para bytes
-
-      // Proteção extra para evitar valores inválidos
-      if (offset < 100 || length <= 0 || offset + length > fileLength) {
-        console.warn(`Registro SHX inválido detectado em idx=${idx}`, {
-          offset,
-          length,
-        })
-        break
-      }
+      const offset = dataView.getInt32(idx, false) * 2 // Big-endian
+      const length = dataView.getInt32(idx + 4, false) * 2 // Big-endian
 
       offsetsLengths.push({ offset, length })
       idx += 8
