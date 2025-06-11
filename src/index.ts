@@ -58,16 +58,31 @@ export const parseFiles = async (
   shpFile: string | Buffer,
   dbfFile: string | Buffer,
   configuration?: Configuration,
-  prjContent?: string,
+  prjContent?: string | Buffer,
 ): Promise<GeoJSON> => {
+  // Lê e converte o .shp
   if (typeof shpFile === 'string') {
     const shpBase64 = await ReactNativeBlobUtil.fs.readFile(shpFile, 'base64')
     shpFile = Buffer.from(shpBase64, 'base64')
   }
+
+  // Lê e converte o .dbf
   if (typeof dbfFile === 'string') {
     const dbfBase64 = await ReactNativeBlobUtil.fs.readFile(dbfFile, 'base64')
     dbfFile = Buffer.from(dbfBase64, 'base64')
   }
 
-  return new Parser(shpFile, dbfFile, prjContent, configuration).parse()
+  let prfString: string | undefined
+
+  if (typeof prjContent === 'string') {
+    if (prjContent.endsWith('.prj') || prjContent.includes('/')) {
+      prfString = await ReactNativeBlobUtil.fs.readFile(prjContent, 'utf8')
+    } else {
+      prfString = prjContent
+    }
+  } else if (Buffer.isBuffer(prjContent)) {
+    prfString = prjContent.toString('utf8')
+  }
+
+  return new Parser(shpFile, dbfFile, prfString, configuration).parse()
 }
