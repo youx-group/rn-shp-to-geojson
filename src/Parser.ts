@@ -36,9 +36,7 @@ export default class Parser {
         this.projection = (coords: [number, number]) =>
           proj4('SOURCE_PROJ', destProj, coords)
       } catch (e) {
-        console.warn(
-          'Could not parse .prj file. Coordinates will not be reprojected.',
-        )
+        throw new Error('Could not parse .prj file')
       }
     }
   }
