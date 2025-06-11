@@ -72,17 +72,17 @@ export const parseFiles = async (
     dbfFile = Buffer.from(dbfBase64, 'base64')
   }
 
-  let prfString: string | undefined
+  let prjString: string | undefined
 
   if (typeof prjContent === 'string') {
     if (prjContent.endsWith('.prj') || prjContent.includes('/')) {
-      prfString = await ReactNativeBlobUtil.fs.readFile(prjContent, 'utf8')
+      prjString = await ReactNativeBlobUtil.fs.readFile(prjContent, 'utf8')
     } else {
-      prfString = prjContent
+      prjString = prjContent
     }
   } else if (Buffer.isBuffer(prjContent)) {
-    prfString = prjContent.toString('utf8')
+    prjString = prjContent.toString('utf8')
   }
 
-  return new Parser(shpFile, dbfFile, prfString, configuration).parse()
+  return new Parser(shpFile, dbfFile, prjString, configuration).parse()
 }
