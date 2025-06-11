@@ -1,17 +1,50 @@
 import { Configuration, GeoJSON } from './types'
 import { getShpByteInfo } from './utils'
+import proj4 from 'proj4'
 
 export default class Parser {
   private shp: Buffer
   private dbf: Buffer
+  private prj?: string
   private configuration?: Configuration
   private features: any[] = []
   private propertiesArray: any[] = []
+  private projection?: (coords: [number, number]) => [number, number]
 
-  constructor(shp: Buffer, dbf: Buffer, configuration?: Configuration) {
+  constructor(
+    shp: Buffer,
+    dbf: Buffer,
+    prj?: string,
+    configuration?: Configuration,
+  ) {
     this.shp = shp
     this.dbf = dbf
+    this.prj = prj
     this.configuration = configuration
+
+    this.initProjection()
+  }
+
+  private initProjection() {
+    if (this.prj) {
+      try {
+        const sourceProj = this.prj
+        const destProj =
+          this.configuration?.projection?.toUpperCase() || 'EPSG:4326'
+
+        proj4.defs('SOURCE_PROJ', sourceProj)
+        this.projection = (coords: [number, number]) =>
+          proj4('SOURCE_PROJ', destProj, coords)
+      } catch (e) {
+        console.warn(
+          'Could not parse .prj file. Coordinates will not be reprojected.',
+        )
+      }
+    }
+  }
+
+  private transformCoords(coords: [number, number]): [number, number] {
+    return this.projection ? this.projection(coords) : coords
   }
 
   parseShp() {
@@ -36,28 +69,29 @@ export default class Parser {
           case 11:
           case 21:
             feature.type = 'Point'
-            feature.coordinates = [
+            feature.coordinates = this.transformCoords([
               dataView.getFloat64(idxFeature, true),
               dataView.getFloat64(idxFeature + 8, true),
-            ]
+            ])
             break
+
           case 3:
           case 13:
           case 23:
           case 5:
           case 15:
           case 25:
-            if (type === 3 || type === 13 || type === 23) {
-              feature.type = 'MultiLineString'
-            } else if (type === 5 || type === 15 || type === 25) {
-              feature.type = 'Polygon'
-            }
+            feature.type =
+              type === 3 || type === 13 || type === 23
+                ? 'MultiLineString'
+                : 'Polygon'
             const numberOfParts: number = dataView.getInt32(
               idxFeature + 32,
               true,
             )
             const nbpoints: number = dataView.getInt32(idxFeature + 36, true)
             idxFeature += 40
+
             const nbpartsPoint: number[] = new Array(numberOfParts)
               .fill(0)
               .map(() => {
@@ -74,15 +108,17 @@ export default class Parser {
                   (i < numberOfParts - 1 ? nbpartsPoint[i + 1] : nbpoints) - 1
                 const part = []
                 for (let j = idstart; j <= idend; j++) {
-                  part.push([
+                  const coord: [number, number] = [
                     dataView.getFloat64(idxFeature, true),
                     dataView.getFloat64(idxFeature + 8, true),
-                  ])
+                  ]
+                  part.push(this.transformCoords(coord))
                   idxFeature += 16
                 }
                 return part
               })
             break
+
           case 8:
           case 18:
           case 28:
@@ -90,21 +126,23 @@ export default class Parser {
             const numberOfPoints = dataView.getInt32(idxFeature + 32, true)
             idxFeature += 36
             feature.coordinates = new Array(numberOfPoints).fill(0).map(() => {
-              const result = [
+              const coord: [number, number] = [
                 dataView.getFloat64(idxFeature, true),
                 dataView.getFloat64(idxFeature + 8, true),
               ]
               idxFeature += 16
-              return result
+              return this.transformCoords(coord)
             })
             break
         }
       } catch (e) {
         throw new Error('Error parsing shp file')
       }
+
       idx += length * 2
       features.push(feature)
     }
+
     this.features = features
   }
 

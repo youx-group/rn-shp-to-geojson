@@ -7,6 +7,7 @@ export interface Configuration {
    * @default true
    */
   trim?: boolean
+  projection?: string
 }
 
 export type ShpByteInfo = {
