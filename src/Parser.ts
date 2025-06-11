@@ -29,7 +29,9 @@ export default class Parser {
     if (this.prj) {
       try {
         const sourceProj = this.prj
-        const destProj = 'EPSG:4326'
+        const destProj =
+          this.configuration?.projection?.toUpperCase() || 'EPSG:4326'
+
         proj4.defs('SOURCE_PROJ', sourceProj)
         this.projection = (coords: [number, number]) =>
           proj4('SOURCE_PROJ', destProj, coords)
